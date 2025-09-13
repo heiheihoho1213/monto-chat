@@ -51,7 +51,7 @@ export const useStyle = createStyles(({ token, css }) => {
     `,
     siderFooter: css`
       border-top: 1px solid ${token.colorBorderSecondary};
-      height: 40px;
+      // height: 40px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -106,6 +106,15 @@ export const useStyle = createStyles(({ token, css }) => {
       max-width: 700px;
       margin: 0 auto;
       color: ${token.colorText};
+    `,
+    thinkCollapse: css`
+      > .ant-collapse-item > .ant-collapse-header {
+        color: ${token.colorTextTertiary};
+      }
+      > .ant-collapse-item .ant-typography {
+        color: ${token.colorTextTertiary};
+        padding: 0;
+      }
     `,
   };
 });

@@ -19,10 +19,10 @@ export const DEFAULT_CONVERSATIONS_ITEMS = [
 export const SENDER_PROMPTS = [
   {
     key: '1',
-    label: '什么是Monto chat？',
+    label: '翻译成中文',
   },
   {
     key: '2',
-    label: '如何使用Monto chat？',
+    label: '翻译成英文',
   },
 ];
