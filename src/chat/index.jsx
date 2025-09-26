@@ -30,7 +30,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import markdownit from 'markdown-it';
 
 import { __awaiter, processStreamChunkData } from './utils';
-import { DEFAULT_CONVERSATIONS_ITEMS, SENDER_PROMPTS } from './const';
+import { DEFAULT_CONVERSATIONS_ITEMS, SENDER_PROMPTS, MODELS } from './const';
 import { useStyle } from './style';
 import { useMemo } from 'react';
 
@@ -55,27 +55,29 @@ const Independent = () => {
   const [attachedFiles, setAttachedFiles] = useState([]);
   const [inputValue, setInputValue] = useState('');
 
-  const [model, setModel] = useState('deepseek-ai/DeepSeek-R1-0528-Qwen3-8B');
+  const [recording, setRecording] = useState(false);
+
+  const [model, setModel] = useState(MODELS[0]);
   /**
    * 🔔 Please replace the BASE_URL, PATH, MODEL, API_KEY with your own values.
    */
   // ==================== Runtime ====================
-  
+
   // 端点类型	主要功能	适用模型示例	典型应用场景
   // ChatCompletions (/v1/chat/completions)	多轮对话、聊天交互	gpt-4o, gpt-4o-mini, gpt-3.5-turbo	聊天机器人、有上下文关联的复杂任务
   // Completions (/v1/completions)	文本补全、单轮指令	gpt-3.5-turbo-instruct	文本摘要、翻译、根据提示续写
   // Embeddings (/v1/embeddings)	生成文本的向量表示	text-embedding-3-small
-    // 使用 useMemo 确保在 model 变化时重新创建 agent
+  // 使用 useMemo 确保在 model 变化时重新创建 agent
   const agentConfig = useMemo(() => ({
-    baseURL: 'https://api.siliconflow.cn/v1/chat/completions',
-    model,
-    dangerouslyApiKey: 'Bearer xxx',
+    baseURL: `https://api.siliconflow.cn/v1/${model.url}`,
+    model: model.key,
+    dangerouslyApiKey: 'Bearer sk-vfkehnpyjkyolqdfsamzmsslupnjunxvltrroshsangkdyrj',
   }), [model]);
-  
+
   const [agent] = useXAgent(agentConfig);
 
   const loading = agent.isRequesting();
-  const { onRequest, messages, setMessages } = useXChat({ 
+  const { onRequest, messages, setMessages } = useXChat({
     agent,
     requestFallback: (_, { error }) => {
       if (error.name === 'AbortError') {
@@ -103,6 +105,9 @@ const Independent = () => {
       message.error('Request is in progress, please wait for the request to complete.');
       return;
     }
+
+    console.log('your attachments are: ', attachedFiles);
+
     onRequest({
       stream: true,
       message: { role: 'user', content: val },
@@ -214,13 +219,12 @@ const Independent = () => {
       />
 
       <Flex vertical gap={12} className={styles.siderFooter}>
-        <Select value={model} onChange={setModel} style={{ width: '100%' }}>
-          <Select.Option value="deepseek-ai/DeepSeek-R1-0528-Qwen3-8B">DeepSeek-R1</Select.Option>
-          <Select.Option value="Qwen/Qwen3-8B">通义千问 v3</Select.Option>
-          <Select.Option value="BAAI/bge-m3">智源研究院 v1-m3</Select.Option>
-          <Select.Option value="Kwai-Kolors/Kolors">可图</Select.Option>
-          <Select.Option value="THUDM/GLM-4.1V-9B-Thinking">智谱 v4.1 图像输入</Select.Option>
-          <Select.Option value="FunAudioLLM/SenseVoiceSmall">SenseVoice 语音</Select.Option>
+        <Select value={model} onChange={key => {
+          setModel(MODELS.find(item => item.key === key));
+        }} style={{ width: '100%' }}>
+          {MODELS.map(item => (
+            <Select.Option key={item.key} value={item.key}>{item.label}</Select.Option>
+          ))}
         </Select>
         <Flex justify="space-between" style={{ width: '100%' }}>
           <Avatar size={24} icon={<UserOutlined />} />
@@ -270,7 +274,6 @@ const Independent = () => {
                 // 从 messages 里找到这一条消息
                 const message = messages.find(item => item.message.content === content);
                 if (message?.message?.think) {
-                  console.log('message', message);
                   return <Collapse
                     size='small'
                     ghost
@@ -382,7 +385,14 @@ const Independent = () => {
         }
         loading={loading}
         className={styles.sender}
-        allowSpeech
+        allowSpeech={{
+          // When setting `recording`, the built-in speech recognition feature will be disabled
+          recording,
+          onRecordingChange: nextRecording => {
+            message.info(`Mock Customize Recording: ${nextRecording}`);
+            setRecording(nextRecording);
+          },
+        }}
         actions={(_, info) => {
           const { SendButton, LoadingButton, SpeechButton } = info.components;
           return (

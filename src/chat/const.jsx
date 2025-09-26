@@ -26,3 +26,30 @@ export const SENDER_PROMPTS = [
     label: '翻译成英文',
   },
 ];
+
+export const MODELS = [
+  {
+    key: 'deepseek-ai/DeepSeek-R1-0528-Qwen3-8B',
+    label: 'DeepSeek-R1',
+    url: 'chat/completions',
+    type: 'text',
+  },
+  {
+    key: 'Qwen/Qwen3-8B',
+    label: '通义千问 v3',
+    url: 'chat/completions',
+    type: 'text',
+  },
+  {
+    key: 'Kwai-Kolors/Kolors',
+    label: '可图',
+    url: 'images/generations',
+    type: 'image',
+  },
+  {
+    key: 'TeleAI/TeleSpeechASR',
+    label: '星辰文本转语音',
+    url: 'audio/speech',
+    type: 'audio',
+  },
+]
